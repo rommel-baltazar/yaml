@@ -2,29 +2,31 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: influxdbv18
+    name: influxdb
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
     labels:
-        app: influxdbv18
-    name: influxdbv18
-    namespace: influxdbv18
+        app: influxdb
+    name: influxdb
+    namespace: influxdb
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: influxdbv18
-    serviceName: influxdbv18
+            app: influxdb
+    serviceName: influxdb
     template:
         metadata:
             labels:
-                app: influxdbv18
+                app: influxdb
         spec:
             containers:
-              - image: 1.8.0-alpine
+              - image: influxdb:latest
                 name: influxdb
+                imagePullPolicy: Always
+                command: [ "echo", "SUCCESS" ]
                 env:
                   - name: INFLUXDB_DB
                     value: "jmeter"
@@ -34,6 +36,8 @@ spec:
                 volumeMounts:
                   - mountPath: /var/lib/influxdb
                     name: data
+            imagePullSecrets:
+                  - name: myregistrykey
     volumeClaimTemplates:
       - metadata:
             name: data
