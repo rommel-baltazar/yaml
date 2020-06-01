@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: influxdbv18
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    labels:
+        app: influxdbv18
+    name: influxdbv18
+    namespace: influxdbv18
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: influxdbv18
+    serviceName: influxdbv18
+    template:
+        metadata:
+            labels:
+                app: influxdbv18
+        spec:
+            containers:
+              - image: 1.8.0-alpine
+                name: influxdb
+                env:
+                  - name: INFLUXDB_DB
+                    value: "jmeter"
+                ports:
+                  - containerPort: 8086
+                    name: influxdb
+                volumeMounts:
+                  - mountPath: /var/lib/influxdb
+                    name: data
+    volumeClaimTemplates:
+      - metadata:
+            name: data
+            namespace: influxdb
+        spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+                requests:
+                    storage: 10G
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: influxdb
+    namespace: influxdb
+spec:
+    ports:
+      - name: influxdb
+        port: 8086
+        targetPort: 8086
+    selector:
+        app: influxdb
+    type: ClusterIP
